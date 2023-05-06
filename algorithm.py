@@ -1,5 +1,6 @@
 from classes.ParseReq import ParseReq
 from classes.VideoAttr import VideoAttr
+from classes.Video import Video
 import heapq
 
 
@@ -18,11 +19,10 @@ def naive_top_k(data, param: ParseReq):
     for index, vid in data.iterrows():
         access_cnt += 1
         aggr_val = data.loc[index, param.vid_attr].agg(param.aggr_func)
-        vid['aggr_val'] = aggr_val
         if(len(heap) < param.rows_amount):
-            heapq.heappush(heap,(aggr_val, vid))
+            heapq.heappush(heap,(aggr_val,  Video(vid,aggr_val)))
         else:
-            heapq.heappushpop(heap,(aggr_val, vid))
+            heapq.heappushpop(heap,(aggr_val,  Video(vid,aggr_val)))
     res = [val[1] for val in heapq.nlargest(param.rows_amount,heap)]
     return res, access_cnt
 
@@ -36,20 +36,18 @@ def threshold_top_k(data, vid_attr : VideoAttr, param : ParseReq):
         access_cnt += 1
         for attr in param.vid_attr:
             index , val = vid_attr.attr_db[attr][i]
-            
             threshold_data.append(val)
             # locate video in database
-            vid = data.iloc[index].copy()
+            vid = data.iloc[index]
             # calc aggregated value for video's attribute
             aggr_val = vid.loc[param.vid_attr].agg(param.aggr_func)
-            vid['aggr_val'] = aggr_val
             # add video to the heap
             if index not in processed:
                 processed.add(index)
                 if(len(heap) < param.rows_amount):
-                    heapq.heappush(heap,(aggr_val, vid))
+                    heapq.heappush(heap,(aggr_val, Video(vid,aggr_val)))
                 else:
-                    heapq.heappushpop(heap,(aggr_val, vid))
+                    heapq.heappushpop(heap,(aggr_val, Video(vid,aggr_val)))
 
         # calculate threshold
         threshold_val = calc_aggr_val(param.aggr_func, threshold_data)

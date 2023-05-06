@@ -6,105 +6,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Topk-Threshold</title>
     <link rel="stylesheet" href="">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
 </head>
 
 <body>
-    <h1>Top-k Threshold algorithm</h1>
-    <div class="container-fluid">
-        <form action="/" method="GET">
-            <fieldset class="input-group mb-3">
-                <legend>Choose your attributes:</legend>
-                {% for col in columns[2:6] %}
-                <div class="form-group" style="margin-right: 10px">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <h1 class="h1" style="margin:auto;">Top-k Threshold algorithm</h1>
+    </nav>
+    <main class="card " style="margin:2rem;">
+        <div class="card-header rounded-2 d-flex">
+            <form class="p-2 flex-grow-1 " action="/" method="GET">
+                <label>Choose your attributes:</label>
+                <div class="input-group">
+                    {% for col in columns[2:6] %}
                     <div class="form-check">
+                        <label class="form-check-label" for="vid_attr">{{col}}</label>
                         {% if col in request.args.getlist('vid_attr') %}
-                        <input name="vid_attr" class="form-check-input" type="checkbox" value="{{col}}" checked>
+                        <input name="vid_attr" id="vid_attr" type="checkbox" value="{{col}}" checked>
                         {% else %}
-                        <input  name="vid_attr" class="form-check-input" type="checkbox" value="{{col}}">
+                        <input name="vid_attr" id="vid_attr" type="checkbox" value="{{col}}">
                         {% endif %}
-                        <label class="form-check-label">{{col}}</label>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </fieldset>
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="aggr_func">Aggregate function options</label>
-                </div>
-                <select name="aggr_func" id="aggr_func" class="form-select" aria-label="">
-                    {% if request.args.get("aggr_func") == "max" %}
+                <div>
+                    <div>
+                        <label for="aggr_func">Aggregate function options:</label>
+                    </div>
+                    <select name="aggr_func" id="aggr_func" required>
+                        <option selected disabled value="">Choose...</option>
+                        {% if request.args.get("aggr_func") == "max" %}
                         <option selected value="max">Max</option>
-                    {% else %}
+                        {% else %}
                         <option value="max">Max</option>
-                    {% endif %}
-                    {% if request.args.get("aggr_func") == "mean" %}
+                        {% endif %}
+                        {% if request.args.get("aggr_func") == "mean" %}
                         <option selected value="mean">Average</option>
                         {% else %}
                         <option value="mean">Average</option>
-                    {% endif %}
-                    {% if request.args.get("aggr_func") == "min" %}
+                        {% endif %}
+                        {% if request.args.get("aggr_func") == "min" %}
                         <option selected value="min">Min</option>
                         {% else %}
                         <option value="min">Min</option>
-                    {% endif %}
-                </select>
-
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="algo_select">Query method options</label>
-                </div>
-                <select name="algo_select" id="algo_select" class="form-select" aria-label="">
-                    {% if request.args.get("algo_select") == "threshold" %}
-                        <option selected value="threshold">Threshold</option>
-                    {% else %}
-                        <option value="threshold">Threshold</option>
-                    {% endif %}
-                    {% if request.args.get("algo_select") == "naive" %}
-                        <option selected value="naive">Naive</option>
-                    {% else %}
-                        <option value="naive">Naive</option>
-                    {% endif %}
+                        {% endif %}
                     </select>
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="k-amount">Rows amount</label>
+
+                    <div>
+                        <label for="algo_select">Algorithm select:</label>
+                    </div>
+                    <select name="algo_select" id="algo_select" aria-label="" required>
+                        <option selected disabled value="">Choose...</option>
+                        {% if request.args.get("algo_select") == "threshold" %}
+                        <option selected value="threshold">Threshold</option>
+                        {% else %}
+                        <option value="threshold">Threshold</option>
+                        {% endif %}
+                        {% if request.args.get("algo_select") == "naive" %}
+                        <option selected value="naive">Naive</option>
+                        {% else %}
+                        <option value="naive">Naive</option>
+                        {% endif %}
+                    </select>
+                    <div>
+                        <label for="rows-amount">Rows amount</label>
+                    </div>
+                    <input type="number" id="rows-amount" value="{{rows_amount}}" name="rows-amount"
+                        placeholder="Number of rows">
                 </div>
-                <input type="number" class="form-control" id="k-amount" value="{{rows_amount}}" name="rows-amount" placeholder="Number of rows">
-            </div>
 
-            <div class="input-group mb-3" style="float: right">
-                <button class="btn btn-primary" type="submit" >Submit</button>
+                <div class="input-group mb-3" style="margin-top:15px">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+            </form>
+            <div class="p-2 card " style="float: right; width: 18rem;">
+                <h2 style="text-align: center;">Statitics</h2>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Top K search took {{ time }} seconds</li>
+                    <li class="list-group-item">Access to database {{ access_cnt }} times</li>
+                </ul>
             </div>
-        </form>
+        </div>
+        <div class="card-body ">
 
-         <table class="table table-dark table-striped-columns mt-5">
-          <thead>
-            <tr class="table-primary" >
-                {% for column in columns %}
-                  <th>{{ column }}</th>
-                {% endfor %}
-                <th>aggr_val</th>
-            </tr>
-          </thead>
-          <tbody>
-              {% for vid in data %}
-               <tr>
-                   <th>{{ vid.title }}</th>
-                   <th>{{ vid.channel_title }}</th>
-                   <th>{{ vid.views }}</th>
-                   <th>{{ vid.likes }}</th>
-                   <th>{{ vid.dislikes }}</th>
-                   <th>{{ vid.comment_count }}</th>
-                   <th>{{ vid.aggr_val }}</th>
-               </tr>
-              {% endfor %}
-          </tbody>
-        </table>
-    
-        <!-- <p>Top K search took {{ time_elapsed }} seconds</p> -->
-        <p>Data source was queried {{ access_cnt }} times</p>
-    </div>
+            <table class="table table-primary rounded-2 table-striped-columns">
+                <thead class="table-dark">
+                    <tr>
+                        {% for column in columns %}
+                        <th style="text-align: center;">{{ column }}</th>
+                        {% endfor %}
+                        <th style="text-align: center;">aggr_val</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vid in data %}
+                    <tr>
+                        <th>{{ vid.title }}</th>
+                        <th>{{ vid.channel_title }}</th>
+                        <th class ="text-nowrap" style="text-align: right;">{{ '{:,}'.format(vid.views).replace(',',' ') }}</th>
+                        <th  class ="text-nowrap" style="text-align: right;">{{ '{:,}'.format(vid.likes).replace(',',' ') }}</th>
+                        <th  class ="text-nowrap" style="text-align: right;">{{ '{:,}'.format(vid.dislikes).replace(',',' ') }}</th>
+                        <th  class ="text-nowrap" style="text-align: right;">{{ '{:,}'.format(vid.comment_count).replace(',',' ') }}</th>
+                        <th  class ="text-nowrap" style="text-align: right;">{{ '{:,}'.format(vid.aggr_val).replace(',',' ') }}</th>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+        </div>
+
+    </main>
 
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
 
 </html>
