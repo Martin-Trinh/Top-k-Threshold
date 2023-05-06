@@ -1,10 +1,9 @@
+from classes.ParseReq import ParseReq
 class VideoAttr:
-    def __init__ (self, dataFrame):
-        self.columns = dataFrame.columns
-        self.attr_db = {
-            'views' : list(dataFrame['views'].sort_values(ascending=False).items()),
-            'likes' : list(dataFrame['likes'].sort_values(ascending=False).items()),
-            'comment_count' : list(dataFrame['comment_count'].sort_values(ascending=False).items())
-        }
+    def __init__ (self, dataFrame, param: ParseReq):
+        self.length = dataFrame.shape[0]
+        self.attr_db = {}
+        for attr in param.vid_attr:
+            self.attr_db[attr] = list(dataFrame[attr].sort_values(ascending=False).items())
     def len(self):
-        return len(self.views_col)
+        return self.length
