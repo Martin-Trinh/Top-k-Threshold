@@ -56,7 +56,7 @@ def threshold_top_k(data,vid_attr :VideoAttr, param):
         # calculate threshold
         threshold_val = calc_aggr_val(param.aggr_func, threshold_data)
         # break if aggregate value is 
-        if len(heap) == param.rows_amount and heap[0][0] <= threshold_val:
+        if len(heap) == param.rows_amount and heap[0][0] >= threshold_val:
             break
 
     res = [val[1] for val in heapq.nlargest(param.rows_amount,heap)]
